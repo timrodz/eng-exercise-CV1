@@ -11,7 +11,7 @@ const PROFILE_STATUS_COLOR: Record<ProfileStatus, string> = {
   "Not Started": "#9e9e9e",
 };
 
-/** Completed+RFE → Completed+Denied → In Progress → Not Started → Completed+In Review → rest */
+/** Completed+RFE → Completed+Denied → In Progress → Not Started → Completed+In Review → Completed+Filed → rest */
 function rowRank(row: Employee): number {
   if (row.profile_status === "Completed" && row.case_status === "RFE Issued") {
     return 1;
@@ -28,7 +28,10 @@ function rowRank(row: Employee): number {
   if (row.profile_status === "Completed" && row.case_status === "In Review") {
     return 5;
   }
-  return 6;
+  if (row.profile_status === "Completed" && row.case_status === "Filed") {
+    return 6;
+  }
+  return 7;
 }
 
 function formatCaseStatus(row: Employee): string {
@@ -70,6 +73,7 @@ export function EmployeesTable({ employees }: EmployeesTableProps) {
             <th>ID</th>
             <th>Name</th>
             <th>Case status</th>
+            <th>Granted</th>
             <th>Expires</th>
           </tr>
         </thead>
@@ -89,6 +93,7 @@ export function EmployeesTable({ employees }: EmployeesTableProps) {
               <td>{row.employee_id}</td>
               <td>{row.full_name}</td>
               <td>{formatCaseStatus(row)}</td>
+              <td>{row.granted_at ? formatDdMmYyyy(row.granted_at) : "—"}</td>
               <td>{row.expires_at ? formatDdMmYyyy(row.expires_at) : "—"}</td>
             </tr>
           ))}
