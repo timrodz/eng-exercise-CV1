@@ -71,7 +71,7 @@ export async function loadRawEmployeeRows(): Promise<RawEmployeeRow[]> {
 }
 
 export function parseEmployeeRows(
-  rawRows: RawEmployeeRow[],
+  rawRows: RawEmployeeRow[]
 ): LoadEmployeesResult {
   resetGeneratedEmployeeIds();
   seedEmployeeIds(rawRows.map((row) => row.employee_id));

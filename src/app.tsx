@@ -1,70 +1,34 @@
 import { useEffect, useState } from "react";
-import { Card } from "./components/card";
+import { EmployeesTable } from "./components/employees-table";
+import { NeedsAttentionSection } from "./components/needs-attention-section";
 import type { Employee } from "./data/employee-schema";
 import { loadEmployees } from "./data/load-employees";
-import { formatDdMmYyyy } from "./data/parse-csv-date";
+import {
+  type RankedCase,
+  rankPriorityCases,
+} from "./domain/rank-priority-cases";
 
-// SCAFFOLD ONLY. A quick, thoughtless dashboard:
-// a hand-rolled status badge, a few raw columns, and one design-system Card.
-// It makes no real decisions about what an HR manager needs to see or how to order it —
-// that's the exercise.
-// The data layer reads every column; the UI shows a handful.
 function App() {
-  const [rows, setRows] = useState<Employee[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [queue, setQueue] = useState<RankedCase[]>([]);
 
   useEffect(() => {
-    loadEmployees().then(({ employees, parseErrors }) => {
+    loadEmployees().then(({ employees: loaded, parseErrors }) => {
       if (parseErrors.length > 0) {
         console.warn("Employee parse errors", parseErrors);
       }
-      setRows(employees);
+      setEmployees(loaded);
+      setQueue(rankPriorityCases(loaded));
     });
   }, []);
-
-  const sorted = [...rows].sort((a, b) => {
-    const aTime = a.expires_at?.getTime() ?? Number.POSITIVE_INFINITY;
-    const bTime = b.expires_at?.getTime() ?? Number.POSITIVE_INFINITY;
-    return aTime - bTime;
-  });
 
   return (
     <div className="page">
       <h1>Visa Tracking</h1>
       <p className="subtitle">Kowhai Robotics — HR dashboard (scaffold)</p>
 
-      <Card label="Employees" value={rows.length} />
-
-      <table>
-        <thead>
-          <tr>
-            <th>Status</th>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Case status</th>
-            <th>Expires</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sorted.map((row) => (
-            <tr key={row.employee_id}>
-              <td>
-                <span
-                  className="badge"
-                  style={{
-                    background: row.expires_at ? "#2e7d32" : "#9e9e9e",
-                  }}
-                >
-                  {row.expires_at ? "Active" : "No expiry"}
-                </span>
-              </td>
-              <td>{row.employee_id}</td>
-              <td>{row.full_name}</td>
-              <td>{row.case_status ?? "—"}</td>
-              <td>{row.expires_at ? formatDdMmYyyy(row.expires_at) : "—"}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <NeedsAttentionSection cases={queue} />
+      <EmployeesTable employees={employees} />
     </div>
   );
 }

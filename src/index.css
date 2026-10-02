@@ -4,7 +4,7 @@ body {
 }
 
 .page {
-  max-width: 800px;
+  max-width: 960px;
   padding: 32px 24px;
   margin: 0 auto;
   font-family: system-ui, sans-serif;
@@ -21,26 +21,96 @@ h1 {
   color: #666;
 }
 
+.section-title {
+  margin: 0 0 4px;
+  font-size: 18px;
+}
+
+.section-subtitle {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: #666;
+}
+
+.needs-attention {
+  margin-bottom: 32px;
+}
+
+.employees-table {
+  margin-bottom: 24px;
+}
+
 /* Design-system sample. The one element on the page with any styling intent. */
 .card {
-  display: inline-block;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
   padding: 16px 20px;
-  margin-bottom: 24px;
   background: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   box-shadow: 0 1px 2px rgb(0 0 0 / 5%);
 }
 
+.employees-table .card {
+  display: inline-block;
+  margin-bottom: 24px;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
 .card-value {
-  font-size: 28px;
+  font-size: 18px;
   font-weight: 600;
+  line-height: 1.3;
 }
 
 .card-label {
   margin-top: 4px;
   font-size: 13px;
   color: #666;
+}
+
+.card-body {
+  padding-top: 12px;
+  margin-top: 12px;
+  border-top: 1px solid #eee;
+}
+
+.card-fields {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin: 0;
+}
+
+.card-fields div {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.card-fields dt {
+  margin: 0;
+  color: #666;
+}
+
+.card-fields dd {
+  margin: 0;
+  color: #1a1a1a;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 800px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Hand-rolled status pill — note this does NOT come from the design system. */

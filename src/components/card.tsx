@@ -7,13 +7,24 @@ import type { ReactNode } from "react";
 type CardProps = {
   label: string;
   value: ReactNode;
+  children?: ReactNode;
 };
 
-export function Card({ label, value }: CardProps) {
+export function Card({ label, value, children }: CardProps) {
   return (
     <div className="card">
       <div className="card-value">{value}</div>
       <div className="card-label">{label}</div>
+      {children ? <div className="card-body">{children}</div> : null}
     </div>
   );
+}
+
+type CardGridProps = {
+  children: ReactNode;
+};
+
+/** Three-column layout for composing Card primitives. */
+export function CardGrid({ children }: CardGridProps) {
+  return <div className="card-grid">{children}</div>;
 }
