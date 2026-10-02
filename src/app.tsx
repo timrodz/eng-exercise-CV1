@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Card } from "./components/card";
+import type { Employee } from "./data/employee-schema";
 import { loadEmployees } from "./data/load-employees";
+import { formatDdMmYyyy } from "./data/parse-csv-date";
 
 // SCAFFOLD ONLY. A quick, thoughtless dashboard:
 // a hand-rolled status badge, a few raw columns, and one design-system Card.
@@ -8,15 +10,22 @@ import { loadEmployees } from "./data/load-employees";
 // that's the exercise.
 // The data layer reads every column; the UI shows a handful.
 function App() {
-  const [rows, setRows] = useState<Record<string, string>[]>([]);
+  const [rows, setRows] = useState<Employee[]>([]);
 
   useEffect(() => {
-    loadEmployees().then(setRows);
+    loadEmployees().then(({ employees, parseErrors }) => {
+      if (parseErrors.length > 0) {
+        console.warn("Employee parse errors", parseErrors);
+      }
+      setRows(employees);
+    });
   }, []);
 
-  const sorted = [...rows].sort((a, b) =>
-    a.expires_at < b.expires_at ? -1 : 1
-  );
+  const sorted = [...rows].sort((a, b) => {
+    const aTime = a.expires_at?.getTime() ?? Number.POSITIVE_INFINITY;
+    const bTime = b.expires_at?.getTime() ?? Number.POSITIVE_INFINITY;
+    return aTime - bTime;
+  });
 
   return (
     <div className="page">
@@ -50,8 +59,8 @@ function App() {
               </td>
               <td>{row.employee_id}</td>
               <td>{row.full_name}</td>
-              <td>{row.case_status}</td>
-              <td>{row.expires_at}</td>
+              <td>{row.case_status ?? "—"}</td>
+              <td>{row.expires_at ? formatDdMmYyyy(row.expires_at) : "—"}</td>
             </tr>
           ))}
         </tbody>

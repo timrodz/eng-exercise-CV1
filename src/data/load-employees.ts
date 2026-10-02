@@ -1,27 +1,12 @@
-// Loads concord_employees.csv into rows of raw strings —
-// every field exactly as stored ("" for blanks).
-// Deliberately bare-minimum: a quick scaffold loader, not a cleaning or normalisation layer.
-
-const COLUMNS = [
-  "employee_id",
-  "full_name",
-  "email",
-  "company",
-  "department",
-  "job_title",
-  "nationality",
-  "work_location",
-  "visa_type",
-  "profile_status",
-  "case_status",
-  "profile_completion_pct",
-  "filed_at",
-  "granted_at",
-  "expires_at",
-  "passport_expiry",
-  "assigned_advisor",
-  "last_updated",
-];
+import type { ZodError } from "zod";
+import {
+  EMPLOYEE_CSV_COLUMNS,
+  type Employee,
+  employeeSchema,
+  type RawEmployeeRow,
+  resetGeneratedEmployeeIds,
+  seedEmployeeIds,
+} from "./employee-schema";
 
 function splitLine(line: string): string[] {
   const fields: string[] = [];
@@ -56,19 +41,57 @@ function splitLine(line: string): string[] {
 
 const NEWLINE = /\r?\n/;
 
-export async function loadEmployees() {
+export type EmployeeParseError = {
+  rowIndex: number;
+  raw: RawEmployeeRow;
+  error: ZodError;
+};
+
+export type LoadEmployeesResult = {
+  employees: Employee[];
+  parseErrors: EmployeeParseError[];
+};
+
+function lineToRawRow(line: string): RawEmployeeRow {
+  const fields = splitLine(line);
+  const row = {} as RawEmployeeRow;
+  for (const [i, key] of EMPLOYEE_CSV_COLUMNS.entries()) {
+    row[key] = fields[i] ?? "";
+  }
+  return row;
+}
+
+export async function loadRawEmployeeRows(): Promise<RawEmployeeRow[]> {
   const res = await fetch("/concord_employees.csv");
   const text = await res.text();
 
   const lines = text.split(NEWLINE).filter((line) => line.length > 0);
-  const rows = lines.slice(1); // drop the header
+  const rows = lines.slice(1);
+  return rows.map(lineToRawRow);
+}
 
-  return rows.map((line) => {
-    const fields = splitLine(line);
-    const row: Record<string, string> = {};
-    COLUMNS.forEach((key, i) => {
-      row[key] = fields[i] ?? "";
-    });
-    return row;
-  });
+export function parseEmployeeRows(
+  rawRows: RawEmployeeRow[],
+): LoadEmployeesResult {
+  resetGeneratedEmployeeIds();
+  seedEmployeeIds(rawRows.map((row) => row.employee_id));
+
+  const employees: Employee[] = [];
+  const parseErrors: EmployeeParseError[] = [];
+
+  for (const [rowIndex, raw] of rawRows.entries()) {
+    const result = employeeSchema.safeParse(raw);
+    if (result.success) {
+      employees.push(result.data);
+    } else {
+      parseErrors.push({ rowIndex, raw, error: result.error });
+    }
+  }
+
+  return { employees, parseErrors };
+}
+
+export async function loadEmployees(): Promise<LoadEmployeesResult> {
+  const rawRows = await loadRawEmployeeRows();
+  return parseEmployeeRows(rawRows);
 }
