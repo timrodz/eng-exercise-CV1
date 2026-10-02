@@ -1,8 +1,4 @@
-import type {
-  CaseStatus,
-  Employee,
-  ProfileStatus,
-} from "../data/employee-schema";
+import type { Employee, ProfileStatus } from "../data/employee-schema";
 import { formatDdMmYyyy } from "../data/parse-csv-date";
 import { Card } from "./card";
 
@@ -16,14 +12,24 @@ const PROFILE_STATUS_COLOR: Record<ProfileStatus, string> = {
   "Not Started": "#9e9e9e",
 };
 
-const CASE_STATUS_RANK: Partial<Record<CaseStatus, number>> = {
-  "RFE Issued": 1,
-  Denied: 2,
-  "Not Filed": 3,
-};
-
-function caseStatusRank(status: CaseStatus | null): number {
-  return status ? (CASE_STATUS_RANK[status] ?? 4) : 4;
+/** Completed+RFE → Completed+Denied → In Progress → Not Started → Completed+In Review → rest */
+function rowRank(row: Employee): number {
+  if (row.profile_status === "Completed" && row.case_status === "RFE Issued") {
+    return 1;
+  }
+  if (row.profile_status === "Completed" && row.case_status === "Denied") {
+    return 2;
+  }
+  if (row.profile_status === "In Progress") {
+    return 3;
+  }
+  if (row.profile_status === "Not Started") {
+    return 4;
+  }
+  if (row.profile_status === "Completed" && row.case_status === "In Review") {
+    return 5;
+  }
+  return 6;
 }
 
 function formatCaseStatus(row: Employee): string {
@@ -42,11 +48,11 @@ function formatCaseStatus(row: Employee): string {
 
 export function EmployeesTable({ employees }: EmployeesTableProps) {
   const sorted = [...employees].sort((a, b) => {
-    const rankDiff = caseStatusRank(a.case_status) - caseStatusRank(b.case_status);
+    const rankDiff = rowRank(a) - rowRank(b);
     if (rankDiff !== 0) {
       return rankDiff;
     }
-    if (a.case_status === "Not Filed") {
+    if (a.profile_status === "In Progress") {
       const aPct = a.profile_completion_pct ?? 0;
       const bPct = b.profile_completion_pct ?? 0;
       return bPct - aPct;
