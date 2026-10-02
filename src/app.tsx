@@ -1,16 +1,23 @@
-import { useEffect, useState } from "react";
-import { EmployeesTable } from "./components/employees-table";
-import { NeedsAttentionSection } from "./components/needs-attention-section";
-import type { Employee } from "./data/employee-schema";
+import { useEffect, useMemo, useState } from "react";
+import { CompanySection } from "./components/company-section";
+import type { Company, Employee } from "./data/employee-schema";
 import { loadEmployees } from "./data/load-employees";
-import {
-  type RankedCase,
-  rankPriorityCases,
-} from "./domain/rank-priority-cases";
+
+function groupByCompany(employees: Employee[]): [Company, Employee[]][] {
+  const groups = new Map<Company, Employee[]>();
+  for (const employee of employees) {
+    const list = groups.get(employee.company);
+    if (list) {
+      list.push(employee);
+    } else {
+      groups.set(employee.company, [employee]);
+    }
+  }
+  return [...groups.entries()].sort(([a], [b]) => a.localeCompare(b));
+}
 
 function App() {
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [queue, setQueue] = useState<RankedCase[]>([]);
 
   useEffect(() => {
     loadEmployees().then(({ employees: loaded, parseErrors }) => {
@@ -18,17 +25,23 @@ function App() {
         console.warn("Employee parse errors", parseErrors);
       }
       setEmployees(loaded);
-      setQueue(rankPriorityCases(loaded));
     });
   }, []);
+
+  const groups = useMemo(() => groupByCompany(employees), [employees]);
 
   return (
     <div className="page">
       <h1>Visa Tracking</h1>
-      <p className="subtitle">Kowhai Robotics — HR dashboard (scaffold)</p>
+      <p className="subtitle">HR dashboard (scaffold)</p>
 
-      <NeedsAttentionSection cases={queue} />
-      <EmployeesTable employees={employees} />
+      {groups.map(([company, companyEmployees]) => (
+        <CompanySection
+          companyName={company}
+          employees={companyEmployees}
+          key={company}
+        />
+      ))}
     </div>
   );
 }

@@ -1,6 +1,5 @@
 import type { Employee, ProfileStatus } from "../data/employee-schema";
 import { formatDdMmYyyy } from "../data/parse-csv-date";
-import { Card } from "./card";
 
 type EmployeesTableProps = {
   employees: Employee[];
@@ -64,8 +63,6 @@ export function EmployeesTable({ employees }: EmployeesTableProps) {
 
   return (
     <section className="employees-table">
-      <Card label="Employees" value={employees.length} />
-
       <table>
         <thead>
           <tr>

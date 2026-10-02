@@ -32,6 +32,25 @@ h1 {
   color: #666;
 }
 
+.company-section {
+  padding-bottom: 8px;
+  margin-bottom: 40px;
+  border-bottom: 1px solid #eee;
+}
+
+.company-section:last-child {
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+.company-section .section-title {
+  margin-bottom: 16px;
+}
+
+.company-count {
+  margin-bottom: 24px;
+}
+
 .needs-attention {
   margin-bottom: 32px;
 }
@@ -52,11 +71,6 @@ h1 {
   box-shadow: 0 1px 2px rgb(0 0 0 / 5%);
 }
 
-.employees-table .card {
-  display: inline-block;
-  margin-bottom: 24px;
-}
-
 .card-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -74,6 +88,10 @@ h1 {
   margin-top: 4px;
   font-size: 13px;
   color: #666;
+}
+
+.company-count .card {
+  display: inline-block;
 }
 
 .card-body {

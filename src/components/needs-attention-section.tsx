@@ -1,12 +1,19 @@
 import { formatDdMmYyyy } from "../data/parse-csv-date";
 import {
   PRIORITY_ACTION_LABELS,
+  type PriorityAction,
   type RankedCase,
 } from "../domain/rank-priority-cases";
 import { Card, CardGrid } from "./card";
 
 type NeedsAttentionSectionProps = {
   cases: RankedCase[];
+};
+
+const ACTION_BADGE_COLOR: Record<PriorityAction, string> = {
+  respond_to_rfe: "#c62828",
+  review_denial: "#6a1b9a",
+  submit_application: "#ed6c02",
 };
 
 function formatPct(value: number | null): string {
@@ -29,18 +36,17 @@ export function NeedsAttentionSection({ cases }: NeedsAttentionSectionProps) {
         {cases.map((row) => (
           <Card
             key={row.employee_id}
-            label={row.full_name}
-            value={PRIORITY_ACTION_LABELS[row.action]}
+            label={
+              <span
+                className="badge"
+                style={{ background: ACTION_BADGE_COLOR[row.action] }}
+              >
+                {PRIORITY_ACTION_LABELS[row.action]}
+              </span>
+            }
+            value={`${row.employee_id} | ${row.full_name}`}
           >
             <dl className="card-fields">
-              <div>
-                <dt>ID</dt>
-                <dd>{row.employee_id}</dd>
-              </div>
-              <div>
-                <dt>Company</dt>
-                <dd>{row.company}</dd>
-              </div>
               <div>
                 <dt>Case status</dt>
                 <dd>{row.case_status ?? "—"}</dd>
