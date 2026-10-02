@@ -73,6 +73,7 @@ export function EmployeesTable({ employees }: EmployeesTableProps) {
             <th>ID</th>
             <th>Name</th>
             <th>Case status</th>
+            <th>Filed</th>
             <th>Granted</th>
             <th>Expires</th>
           </tr>
@@ -93,6 +94,7 @@ export function EmployeesTable({ employees }: EmployeesTableProps) {
               <td>{row.employee_id}</td>
               <td>{row.full_name}</td>
               <td>{formatCaseStatus(row)}</td>
+              <td>{row.filed_at ? formatDdMmYyyy(row.filed_at) : "—"}</td>
               <td>{row.granted_at ? formatDdMmYyyy(row.granted_at) : "—"}</td>
               <td>{row.expires_at ? formatDdMmYyyy(row.expires_at) : "—"}</td>
             </tr>
