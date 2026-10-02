@@ -62,6 +62,7 @@ function lineToRawRow(line: string): RawEmployeeRow {
 }
 
 export async function loadRawEmployeeRows(): Promise<RawEmployeeRow[]> {
+  // TODO: Load this with a dedicated CSV parsing library
   const res = await fetch("/concord_employees.csv");
   const text = await res.text();
 

@@ -5,7 +5,7 @@
 import type { ReactNode } from "react";
 
 type CardProps = {
-  label: string;
+  label: ReactNode;
   value: ReactNode;
   children?: ReactNode;
 };
